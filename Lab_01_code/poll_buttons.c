@@ -110,7 +110,7 @@ void down()
 	static uint8_t button_state = RELEASED;
 	
 	// read PA5, check if presed
-	if(GPIOA->IDR & GPIO_IDR_ID5) // mask = 0xC0
+	if(GPIOA->IDR & GPIO_IDR_ID5) // mask = 0x20
 	{
 		// only reset LEDs if button is not already being pressed
 		if(button_state == RELEASED)
