@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\Lab_02C.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\Lab_02C.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat Jan 09 22:39:57 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Jan 18 02:41:27 2021
 <BR><P>
 <H3>Maximum Stack Usage =        160 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -681,14 +681,14 @@ Global Symbols
 
 <P><STRONG><a name="[c3]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[7c]"></a>Get_RTC_Calendar</STRONG> (Thumb, 232 bytes, Stack size 32 bytes, rtc.o(i.Get_RTC_Calendar))
+<P><STRONG><a name="[7c]"></a>Get_RTC_Calendar</STRONG> (Thumb, 204 bytes, Stack size 32 bytes, rtc.o(i.Get_RTC_Calendar))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160 + Unknown Stack Size
 <LI>Call Chain = Get_RTC_Calendar &rArr; __2sprintf &rArr; _printf_char_common &rArr; __printf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
-<LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_TIME_GetSecond
-<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_TIME_GetMinute
-<LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_TIME_GetHour
+<LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_TIME_GetSecond
+<LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_TIME_GetMinute
+<LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_TIME_GetHour
 <LI><a href="#[80]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_DATE_GetYear
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_DATE_GetMonth
 <LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_DATE_GetDay
@@ -781,7 +781,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_RTC_Calendar
 </UL>
 
-<P><STRONG><a name="[8f]"></a>RTC_Disable_Write_Protection</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, rtc.o(i.RTC_Disable_Write_Protection))
+<P><STRONG><a name="[8f]"></a>RTC_Disable_Write_Protection</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, rtc.o(i.RTC_Disable_Write_Protection))
 <BR><BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_Init
 <LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_Set_Alarm
 </UL>
@@ -792,7 +792,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[8d]"></a>RTC_Init</STRONG> (Thumb, 102 bytes, Stack size 4 bytes, rtc.o(i.RTC_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = RTC_Init &rArr; RTC_Set_Time
+<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = RTC_Init &rArr; RTC_Set_Time
 </UL>
 <BR>[Calls]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_Set_Time
 <LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_Set_Calendar_Date
@@ -813,27 +813,27 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[90]"></a>RTC_Set_Calendar_Date</STRONG> (Thumb, 292 bytes, Stack size 16 bytes, rtc.o(i.RTC_Set_Calendar_Date))
-<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = RTC_Set_Calendar_Date
+<P><STRONG><a name="[90]"></a>RTC_Set_Calendar_Date</STRONG> (Thumb, 198 bytes, Stack size 20 bytes, rtc.o(i.RTC_Set_Calendar_Date))
+<BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = RTC_Set_Calendar_Date
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_Init
 </UL>
 
-<P><STRONG><a name="[91]"></a>RTC_Set_Time</STRONG> (Thumb, 256 bytes, Stack size 16 bytes, rtc.o(i.RTC_Set_Time))
-<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = RTC_Set_Time
+<P><STRONG><a name="[91]"></a>RTC_Set_Time</STRONG> (Thumb, 158 bytes, Stack size 20 bytes, rtc.o(i.RTC_Set_Time))
+<BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = RTC_Set_Time
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RTC_Init
 </UL>
 
-<P><STRONG><a name="[7d]"></a>RTC_TIME_GetHour</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, rtc.o(i.RTC_TIME_GetHour))
+<P><STRONG><a name="[7f]"></a>RTC_TIME_GetHour</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, rtc.o(i.RTC_TIME_GetHour))
 <BR><BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_RTC_Calendar
 </UL>
 
-<P><STRONG><a name="[7f]"></a>RTC_TIME_GetMinute</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, rtc.o(i.RTC_TIME_GetMinute))
+<P><STRONG><a name="[7e]"></a>RTC_TIME_GetMinute</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, rtc.o(i.RTC_TIME_GetMinute))
 <BR><BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_RTC_Calendar
 </UL>
 
-<P><STRONG><a name="[7e]"></a>RTC_TIME_GetSecond</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, rtc.o(i.RTC_TIME_GetSecond))
+<P><STRONG><a name="[7d]"></a>RTC_TIME_GetSecond</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, rtc.o(i.RTC_TIME_GetSecond))
 <BR><BR>[Called By]<UL><LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Get_RTC_Calendar
 </UL>
 

@@ -154,7 +154,7 @@
           <Type>0</Type>
           <LineNumber>132</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134225062</Address>
+          <Address>134224854</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -166,6 +166,14 @@
           <Expression>\\Lab_02C\main.c\132</Expression>
         </Bp>
       </Breakpoint>
+      <MemoryWindow1>
+        <Mm>
+          <WinNumber>1</WinNumber>
+          <SubType>0</SubType>
+          <ItemText>0x3c</ItemText>
+          <AccSizeX>0</AccSizeX>
+        </Mm>
+      </MemoryWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>
@@ -210,7 +218,7 @@
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
         <Entry>
-          <Name>System Viewer\EXTI</Name>
+          <Name>System Viewer\RTC</Name>
           <WinId>35904</WinId>
         </Entry>
       </SystemViewers>

@@ -68,10 +68,10 @@ void RTC_Init(void)
 	// Configure the Date 
 	/* Note: __LL_RTC_CONVERT_BIN2BCD helper macro can be used if user wants to */
 	/*       provide directly the decimal value:                                */
-	RTC_Set_Calendar_Date(RTC_WEEKDAY_SATURDAY, 0x09, RTC_MONTH_JANUARY, 0x15); /* [TODO] These values are stubs - fill in current date */
+	RTC_Set_Calendar_Date(RTC_WEEKDAY_FRIDAY, 22, RTC_MONTH_JANUARY, 21); /* [TODO] These values are stubs - fill in current date */
 	
 	// Configure the Time 
-	RTC_Set_Time(RTC_TR_PM, 0x04, 0x28, 0x0); /* [TODO] These values are stubs - fill in current time */
+	RTC_Set_Time(RTC_TR_PM, 4, 40, 22); /* [TODO] These values are stubs - fill in current time */
   
 	// Exit of initialization mode 
 	RTC->ISR &= ~RTC_ISR_INIT;
@@ -105,34 +105,40 @@ void RTC_Init(void)
 
 void RTC_Set_Calendar_Date(uint32_t WeekDay, uint32_t Day, uint32_t Month, uint32_t Year) 
 {
-	// Write the date values in the correct place within the RTC Date Register by shifting using the position defines
-	uint32_t date = 0; // first store values to an intermediate variable
+	// seems that can only write to the register once so need to save reserved bits and overwrite the rest
+	uint32_t reserved_bits_mask = (0xFF << 24) | (3 << 5);
+	uint32_t reserved_bits = (RTC->DR & reserved_bits_mask);
 	
-	date |= (__RTC_CONVERT_BIN2BCD(WeekDay) << RTC_POSITION_DR_WDU);     // place the weekday unit
-	date |= ((__RTC_CONVERT_BIN2BCD(Day)&0x0F) << RTC_POSITION_DR_DU);   // place the day unit
-	date |= ((__RTC_CONVERT_BIN2BCD(Day)>>4) << RTC_POSITION_DR_DT);     // place the day tens
-	date |= ((__RTC_CONVERT_BIN2BCD(Month)&0x0F) << RTC_POSITION_DR_MU); // place the month unit
-	date |= ((__RTC_CONVERT_BIN2BCD(Month)>>4) << RTC_POSITION_DR_MT);   // place the month tens
-	date |= ((__RTC_CONVERT_BIN2BCD(Year)&0x0F) << RTC_POSITION_DR_YU);  // place the year unit
-	date |= ((__RTC_CONVERT_BIN2BCD(Year)>>4) << RTC_POSITION_DR_YT);    // place the year tens
-	 
-	RTC->DR |= date;  // write all values in one shot
+	// store values to an intermediate variable
+	uint32_t date = 0; 
+	
+	// Write the date values in the correct place within the RTC Date Register by shifting using position #defines
+	date |= (__RTC_CONVERT_BIN2BCD(WeekDay) << RTC_POSITION_DR_WDU); // place the weekday unit
+	date |= (__RTC_CONVERT_BIN2BCD(Day) << RTC_POSITION_DR_DU);      // place the day unit and tens
+	date |= (__RTC_CONVERT_BIN2BCD(Month) << RTC_POSITION_DR_MU);    // place the month unit and tens
+	date |= (__RTC_CONVERT_BIN2BCD(Year) << RTC_POSITION_DR_YU);     // place the year unit and tens
+	
+	// overwrite all values in one shot, make sure to retain reserved bits
+	RTC->DR = (date | reserved_bits);
 }
 
 void RTC_Set_Time(uint32_t Format12_24, uint32_t Hour, uint32_t Minute, uint32_t Second) 
 {
-	// Write the time values in the correct place within the RTC Time Register
-	uint32_t time = 0; // first store values to an intermediate variable
+	// seems that can only write to the register once so need to save reserved bits and overwrite the rest
+	uint32_t reserved_bits_mask = (0x1FF << 23) | (1 << 15) | (1 << 7);
+	uint32_t reserved_bits = (RTC->TR & reserved_bits_mask);
 	
+	// store values to an intermediate variable
+	uint32_t time = 0; 
+	
+	// Write the time values in the correct place within the RTC Time Register by shifting using position #defines
 	time |= (Format12_24);   // place format to 12 or 24
-	time |= ((__RTC_CONVERT_BIN2BCD(Hour)&0x0F) << RTC_POSITION_TR_HU);   // place the hour unit
-	time |= ((__RTC_CONVERT_BIN2BCD(Hour)>>4) << RTC_POSITION_TR_HT);     // place the hour tens
-	time |= ((__RTC_CONVERT_BIN2BCD(Minute)&0x0F) << RTC_POSITION_TR_MU); // place the minute unit
-	time |= ((__RTC_CONVERT_BIN2BCD(Minute)>>4) << RTC_POSITION_TR_MT);   // place the minute tens
-	time |= ((__RTC_CONVERT_BIN2BCD(Second)&0x0F) << RTC_POSITION_TR_SU); // place the second unit
-	time |= ((__RTC_CONVERT_BIN2BCD(Second)>>4) << RTC_POSITION_TR_ST);   // place the second tens
+	time |= (__RTC_CONVERT_BIN2BCD(Hour) << RTC_POSITION_TR_HU);   // place the hour unit
+	time |= (__RTC_CONVERT_BIN2BCD(Minute) << RTC_POSITION_TR_MU); // place the minute unit
+	time |= (__RTC_CONVERT_BIN2BCD(Second) << RTC_POSITION_TR_SU); // place the second unit
 	
-	RTC->TR |= time; // write all values in one shot
+	// overwrite all values in one shot, make sure to retain reserved bits
+	RTC->TR = (time | reserved_bits);
 }
 
 void RTC_Clock_Init(void) 
@@ -177,8 +183,8 @@ void RTC_Clock_Init(void)
 void RTC_Disable_Write_Protection(void) 
 {
 	// write 0xCA and 0x53 sequentially to unlock
-	RTC->WPR = 0xCAU;
-	RTC->WPR = 0x53U;
+	RTC->WPR |= 0xCAU;
+	RTC->WPR |= 0x53U;
 }
 	
 void RTC_Enable_Write_Protection(void) 
@@ -232,7 +238,6 @@ void Get_RTC_Calendar(char * strTime, char * strDate)
 {
 	/* Note: need to convert in decimal value in using __LL_RTC_CONVERT_BCD2BIN helper macro */
 	/* Display time Format : hh:mm:ss */
-	uint32_t h = __RTC_CONVERT_BCD2BIN(RTC_TIME_GetHour());
 	sprintf((char*)strTime,"%.2d:%.2d:%.2d", 
 		__RTC_CONVERT_BCD2BIN(RTC_TIME_GetHour()), 
 		__RTC_CONVERT_BCD2BIN(RTC_TIME_GetMinute()), 

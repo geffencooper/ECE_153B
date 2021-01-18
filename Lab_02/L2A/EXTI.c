@@ -51,7 +51,7 @@ void EXTI_Init(void)
 			2. Set bit locations for button GPIOs
 			
 			For clarity, each individual GPIO pin was configured as shown below.
-			(Step 2 is actually redundant because the bits are being configured to 000)
+			(Step 2 is kind of useless because the set bits are 000)
 	*/
 	SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI0;   // 1. Reset bits 2:0   of EXTICR1 (for PA0)
 	SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI1;   //    Reset bits 6:4   of EXTICR1 (for PA1)
@@ -69,8 +69,6 @@ void EXTI_Init(void)
 			EXTI_FTSR1 bits 16:0 correspond to EXTI lines 0-16
 			
 			1. Set bit locations for button GPIOs
-			
-			For clarity, each individual GPIO pin was configured as shown below.
 	*/
 	EXTI->FTSR1 |= EXTI_FTSR1_FT0; // Set bit 0 to enable FT for EXTI0 (PA0)
 	EXTI->FTSR1 |= EXTI_FTSR1_FT1; // Set bit 1 to enable FT for EXTI1 (PA1)
@@ -103,7 +101,7 @@ void EXTI_Init(void)
 	NVIC_SetPriority(EXTI2_IRQn, 0);
 }
 
-// [TODO] Write Interrupt Handlers (look in startup_stm32l476xx.s to find the 
+// Write Interrupt Handlers (look in startup_stm32l476xx.s to find the 
 // interrupt handler names that you should use)
 
 // center button pressed

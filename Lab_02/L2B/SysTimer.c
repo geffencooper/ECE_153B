@@ -15,7 +15,7 @@ void SysTick_Init(void) {
 	SysTick->CTRL = 0; // Disable SysTick IRQ and SysTick Counter
 	
 	// SysTick Reload Value Register
-	SysTick->LOAD = 1000; // SysClk is MSI which is 8Mhz, CLKSOURCE is 0 so SysTick = 8MHz/8 = 1Mhz --> 1us*1000=1ms
+	SysTick->LOAD = 999; // SysClk is MSI which is 8Mhz, CLKSOURCE is 0 so SysTick = 8MHz/8 = 1Mhz --> 1us*1000=1ms
 	
 	// SysTick Current Value Register
 	SysTick->VAL = 0;
@@ -45,28 +45,15 @@ void SysTick_Handler(void)
 
 void delay(uint32_t T) 
 {
-	// store the current value of msTicks
-	int currentTicks = (int)msTicks; 
-	
-	// time elapsed since entered function
-	int elapsed = (int)msTicks - currentTicks;
-	
-	// when msTicks overflows and rolls over it is possible that
-	// elapsed will become negative so need to account for this case
-	if(elapsed < 0)
+	// edge case
+	if(T == 0)
 	{
-		// account for this by adding the time before the rollover
-		elapsed = (INT32_MAX - currentTicks) + msTicks;
+		return;
 	}
 	
-	// wait until T amount of msTicks has passed since entered function
-	while(elapsed < T)
-	{
-		elapsed = (int)msTicks - currentTicks;
-		
-		if(elapsed < 0)
-		{
-			elapsed = (INT32_MAX - currentTicks) + msTicks;
-		}
-	}	
+	// set up expiration value
+	uint32_t expiration = msTicks + T;
+	
+	// busy loop, handles edge case of msTicks overflow
+	while(msTicks != expiration){}
 }

@@ -41,7 +41,7 @@ void RTC_Set_Alarm(void)
 	while((RTC->ISR & RTC_ISR_ALRAWF) == 0);
 	while((RTC->ISR & RTC_ISR_ALRBWF) == 0);
 	
-	// initialize alarm A to trigger every 30 seconds
+	// initialize alarm A to trigger on 30 seconds
 	                // set the tens value                set the unit value
 	RTC->ALRMAR |= ((__RTC_CONVERT_BIN2BCD(3) << 4) + (__RTC_CONVERT_BIN2BCD(0) << 0));
 	

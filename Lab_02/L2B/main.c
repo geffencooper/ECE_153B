@@ -14,7 +14,7 @@ void System_Clock_Init(void)
 {
 	// Select MSI as system clock source
 	RCC->CFGR &= ~RCC_CFGR_SW;    // Reset system clock switch bits of clock configuration register to 00
-	RCC->CFGR |= RCC_CFGR_SW_MSI; // Set flag to 00 to select MSI as system clock
+	RCC->CFGR |= RCC_CFGR_SW_MSI; // Set flag to select MSI as system clock
 	
 	// Set MSI clock range
 	RCC->CR &= ~RCC_CR_MSIRANGE;  // Reset the MSIRANGE bits in the register
