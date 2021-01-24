@@ -39,7 +39,7 @@ void PWM_Init()
 	
 	// set the prescaler (sysclock is 4MHz, prescaler scales this to desired tick period)
 	TIM1->PSC &= ~TIM_PSC_PSC; // reset the prescaler
-	TIM1->PSC = 4; // make it 1MHz --> 4Mhz/4
+	TIM1->PSC = 3; // make it 1MHz --> 4Mhz/(3+1)
 	
 	// set the autoreload register (counter max value, defines timer frequency --> sawtooth wave)
 	TIM1->ARR &= ~TIM_ARR_ARR; // reset the auto reload register
