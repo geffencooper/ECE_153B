@@ -86,30 +86,45 @@ void TIM4_IRQHandler(void)
 		// clear update interrupt flag
 		TIM4->SR &= ~TIM_SR_UIF;
 		
-		// account in timer captur values
+		// if overflow happened after first capture, store pre-rollover time
+		if(currentValue)
+		{
+			overflowCount = 0xFFFF - currentValue;
+		}
 	}
-			// clear the update interrupt flag
-			// set a state variable so know a rollover happened
+		
 	// check if input capture flag triggered
 	if(TIM4->SR & TIM_SR_CC1IF)
 	{
 		// check if second consecutive interrupt (current already set)
 		if(currentValue)
 		{
+			// move the first value, store the second value
 			lastValue = currentValue;
 			currentValue = TIM4->CCR1;
-			// reset flag in case not automatically
-			timeInterval = currentValue - lastValue; // account for overflow
+			
+			// if an overflow happened between triggers, add on pre-rollover time to current time
+			if(overflowCount)
+			{
+				timeInterval = overflowCount + currentValue;
+			}
+			// otherwise, just subtract the value
+			else
+			{
+				timeInterval = currentValue - lastValue;
+			}
+			
+			// reset the values
+			currentValue = 0;
+			lastValue = 0;
+			overflowCount = 0;
 		}
+		// first trigger
 		else
 		{
-			currentValue = TIM4->CCR1; // account for overflow
-			// reset flag in case not automatically
+			currentValue = TIM4->CCR1;
 		}
 	}
-	// check if ccif is set
-		// check if second in a row
-				// calculate the differene, accorunting for overflow
 }
 
 // PE11
@@ -208,8 +223,40 @@ int main(void)
 	
 	char message[6];
 	while(1) 
-{
-		// [TODO]
+  {
+		// timer clock is 1 MHz --> 1us fidelity
+		// d = PW(us)/58 cm
+		
+		// if the time interval is 38ms then object is out of range
+		if(timeInterval/1000 == 38)
+		{
+			for(int i = 0; i < 6; i++)
+			{
+				message[i] = '-';
+			}
+		}
+		// otherwise, find the distance, convert to a string
+		else
+		{
+			int cm = timeInterval / 58;
+			int i = 0;
+			// convert int to string
+			while(cm !=0)
+			{
+				message[i] = (cm%10 + 48);
+				cm /= 10;
+				i++;
+			}
+			// reverse the string because it will copy in backwards
+			for(int j = 0; j < i/2; j++)
+			{
+					char tmp = message[j];
+					message[j] = message[i-j-1];
+					message[i-j-1] = tmp;
+			}
+			// set the null terminator of the string
+			message[i] = '\0';
+		}
 		
 		LCD_DisplayString((uint8_t *) message);
 	}
