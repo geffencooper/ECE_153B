@@ -36,17 +36,80 @@ void Input_Capture_Setup()
 	GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR6; // reset, no pull up, pull down = 00
 
 	// Enable TIM4 Clock
-	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM4EN;
 	
 	// set the prescaler (sysclock is 16MHz, prescaler scales this to desired tick period)
-	TIM1->PSC &= ~TIM_PSC_PSC; // reset the prescaler
-	TIM1->PSC = 15; // make it 16Mhz/(15+1) = 1MHz
+	TIM4->PSC &= ~TIM_PSC_PSC; // reset the prescaler
+	TIM4->PSC = 15; // make it 16Mhz/(15+1) = 1MHz
 	
+	// enable auto-reload preload
+	TIM4->CR1 |= TIM_CR1_ARPE;
+	
+	// set the autoreload register to max value
+	TIM4->ARR = TIM_ARR_ARR;
+	
+	// configure capture compare mode register to map input capture 1 to timer input 1
+	TIM4->CCMR1 &= ~TIM_CCMR1_CC1S; // reset
+	TIM4->CCMR1 |= TIM_CCMR1_CC1S_0; // set bit one so IC1 --> TI1
+	
+	// capture rising and falling edges, set CC1NP and CC1P
+	TIM4->CCER |= (TIM_CCER_CC1NP | TIM_CCER_CC1P);
+	
+	// enable capturing
+	TIM4->CCER |= TIM_CCER_CC1E;
+	
+	// enable interrupt and DMA requests and update interrupt enable
+	TIM4->DIER |= (TIM_DIER_CC1IE | TIM_DIER_UDE | TIM_DIER_UIE);
+
+	// enable update generation in event generation register
+	TIM4->EGR |= TIM_EGR_UG;
+	
+	// clear update interrupt flag
+	TIM4->SR &= ~TIM_SR_UIF;
+	
+	// set the direction to count up
+	TIM4->CR1 &= ~TIM_CR1_DIR; // dir = counts up, reset bit to 0
+
+	// enable the counter for timer 4
+	TIM4->CR1 |= TIM_CR1_CEN;
+	
+	// Configure and Enable in NVIC
+	NVIC_EnableIRQ(TIM4_IRQn);
+	NVIC_SetPriority(TIM4_IRQn, 2);
 }
 
 void TIM4_IRQHandler(void) 
 {
-	// [TODO]
+	// check if event was overflow
+	if(TIM4->SR & TIM_SR_UIF)
+	{
+		// clear update interrupt flag
+		TIM4->SR &= ~TIM_SR_UIF;
+		
+		// account in timer captur values
+	}
+			// clear the update interrupt flag
+			// set a state variable so know a rollover happened
+	// check if input capture flag triggered
+	if(TIM4->SR & TIM_SR_CC1IF)
+	{
+		// check if second consecutive interrupt (current already set)
+		if(currentValue)
+		{
+			lastValue = currentValue;
+			currentValue = TIM4->CCR1;
+			// reset flag in case not automatically
+			timeInterval = currentValue - lastValue; // account for overflow
+		}
+		else
+		{
+			currentValue = TIM4->CCR1; // account for overflow
+			// reset flag in case not automatically
+		}
+	}
+	// check if ccif is set
+		// check if second in a row
+				// calculate the differene, accorunting for overflow
 }
 
 // PE11
