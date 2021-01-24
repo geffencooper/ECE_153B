@@ -96,6 +96,9 @@ void TIM4_IRQHandler(void)
 	// check if input capture flag triggered
 	if(TIM4->SR & TIM_SR_CC1IF)
 	{
+		// clear capture interrupt flag
+		TIM4->SR &= ~TIM_SR_CC1IF;
+		
 		// check if second consecutive interrupt (current already set)
 		if(currentValue)
 		{
@@ -139,12 +142,12 @@ void Trigger_Setup()
 	GPIOE->MODER |= ~GPIO_MODER_MODE11_0; // set to 01 = alternative function
 
 	// configure the alternative function for GPIO PE11 to TIM1_CH2
-	// TIM1_CH2=AF1, pin11 is in the upper half of the registers
-	GPIOE->AFR[1] &= ~GPIO_AFRH_AFSEL11;  // reset pin 8 selection
+	// TIM1_CH2=AF1, pin 11 is in the upper half of the registers
+	GPIOE->AFR[1] &= ~GPIO_AFRH_AFSEL11;  // reset pin 11 selection
 	GPIOE->AFR[1] |= GPIO_AFRH_AFSEL11_0; // set bit 0 to select AF1 --> 0001 
 
 	// set PUPD to no pull up no pull down
-	GPIOE->PUPDR &= ~GPIO_PUPDR_PUPDR11; // reset, no pull up, pull down = 00
+	GPIOE->PUPDR &= ~GPIO_PUPDR_PUPD11; // reset, no pull up, pull down = 00
 
 	// set the output to push pull
 	GPIOE->OTYPER &= ~GPIO_OTYPER_OT11; // bit = 0 --> push pull
@@ -166,19 +169,19 @@ void Trigger_Setup()
 	// set the autoreload register to max value
 	TIM1->ARR = TIM_ARR_ARR;
 	
-	// high pulse of 10us (PWM mode 1 so high when count < CCR)
+	// high pulse of 10us (PWM mode 1 and downcounting so OCREF high when count <= CCR)
 	// PW = (CCR-1)*(clock period)
-	// CCR = PW/(clock period) + 1 = 10us/(1/10MHz) + 1 = 101
-	TIM1->CCR1 &= ~TIM_CCR1_CCR1; // reset CCR
-	TIM1->CCR1 = 101;
+	// CCR = PW/(clock period) - 1 = 10us/1 MHz - 1 = 10-1
+	TIM1->CCR2 &= ~TIM_CCR2_CCR2; // reset CCR
+	TIM1->CCR2 = 9;
 	
-	// use the timer in output compare mode (output compare 1)
-	TIM1->CCMR1 &= ~TIM_CCMR1_OC1M; // clear the output compare bits
-	TIM1->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2); // set to PWM mode 1 by setting bits 1,2 (0110)
-  TIM1->CCMR1 |= TIM_CCMR1_OC1PE; // enable output preload
+	// set output control mode to PWM mode 1 and enable output compare preload
+	TIM1->CCMR1 &= ~TIM_CCMR1_OC2M; // clear the output compare bits
+	TIM1->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2); // set to PWM mode 1 by setting bits 1,2 (0110)
+  TIM1->CCMR1 |= TIM_CCMR1_OC2PE; // enable output preload
 
 	// enable the output
-	TIM1->CCMR1 |= TIM_CCMR1_CC1S_0;
+	TIM1->CCMR1 &= ~TIM_CCMR1_CC2S;
 	
 	// set main output enable, set off-state selection for run mode
 	TIM1->BDTR |= TIM_BDTR_MOE;
@@ -193,8 +196,8 @@ void Trigger_Setup()
 	// clear update interrupt flag
 	TIM1->SR &= ~TIM_SR_UIF;
 	
-	// set the direction to count up
-	TIM1->CR1 &= ~TIM_CR1_DIR; // dir = counts up, reset bit to 0
+	// set the direction to count down
+	TIM1->CR1 |= TIM_CR1_DIR; // dir = counts down, set bit to 1
 
 	// enable the counter for timer 1
 	TIM1->CR1 |= TIM_CR1_CEN;
