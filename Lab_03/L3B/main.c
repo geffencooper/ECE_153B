@@ -46,7 +46,7 @@ void Input_Capture_Setup()
 	TIM4->CR1 |= TIM_CR1_ARPE;
 	
 	// set the autoreload register to max value
-	TIM4->ARR = TIM_ARR_ARR;
+	TIM4->ARR = TIM_ARR_ARR-1;
 	
 	// configure capture compare mode register to map input capture 1 to timer input 1
 	TIM4->CCMR1 &= ~TIM_CCMR1_CC1S; // reset
@@ -167,7 +167,7 @@ void Trigger_Setup()
 	TIM1->CR1 |= TIM_CR1_ARPE;
 	
 	// set the autoreload register to max value
-	TIM1->ARR = TIM_ARR_ARR;
+	TIM1->ARR = TIM_ARR_ARR-1;
 	
 	// high pulse of 10us (PWM mode 1 and downcounting so OCREF high when count <= CCR)
 	// PW = (CCR-1)*(clock period)
@@ -182,10 +182,11 @@ void Trigger_Setup()
 
 	// enable the output
 	TIM1->CCMR1 &= ~TIM_CCMR1_CC2S;
+	TIM1->CCER |= TIM_CCER_CC2E;
 	
 	// set main output enable, set off-state selection for run mode
 	TIM1->BDTR |= TIM_BDTR_MOE;
-	TIM1->BDTR |= TIM_BDTR_OSSR;
+	//TIM1->BDTR |= TIM_BDTR_OSSR;
 	
 	// enable update generation in event generation register
 	TIM1->EGR |= TIM_EGR_UG;
@@ -228,7 +229,7 @@ int main(void)
 	while(1) 
   {
 		// wait for it to be populated
-		//while(timeInterval == 0){}
+		while(timeInterval == 0){}
 		
 		// timer clock is 1 MHz --> 1us fidelity
 		// d = PW(us)/58 cm
@@ -245,23 +246,18 @@ int main(void)
 		else
 		{
 			int cm = timeInterval / 58;
-			int i = 0;
+			int i = 5;
 			// convert int to string
 			while(cm !=0)
 			{
 				message[i] = (cm%10 + 48);
 				cm /= 10;
-				i++;
+				i--;
 			}
-			// reverse the string because it will copy in backwards
-			for(int j = 0; j < i/2; j++)
+			for(i; i >= 0; i--)
 			{
-					char tmp = message[j];
-					message[j] = message[i-j-1];
-					message[i-j-1] = tmp;
+				message[i] = 48;
 			}
-			// set the null terminator of the string
-			message[i] = '\0';
 		}
 		
 		LCD_DisplayString((uint8_t *) message);
