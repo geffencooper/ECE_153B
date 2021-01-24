@@ -25,11 +25,11 @@ void Input_Capture_Setup()
 	// Configure PB6
 	// set mode to alternative function
 	GPIOB->MODER &= ~GPIO_MODER_MODE6; // reset
-	GPIOB->MODER |= ~GPIO_MODER_MODE6_0; // set to 01 = alternative function
+	GPIOB->MODER |= GPIO_MODER_MODE6_1; // set to 10 = alternative function
 
 	// configure the alternative function for GPIO PB6 to TIM4_CH1
 	// TIM4_CH1=AF2, pin6 is in the lower half of the registers
-	GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL6;  // reset pin 8 selection
+	GPIOB->AFR[0] &= ~GPIO_AFRL_AFSEL6;  // reset pin 6 selection
 	GPIOB->AFR[0] |= GPIO_AFRL_AFSEL6_1; // set bit 1 to select AF2 --> 0010 
 
 	// set PUPD to no pull up no pull down
@@ -89,16 +89,13 @@ void TIM4_IRQHandler(void)
 		// if overflow happened after first capture, store pre-rollover time
 		if(currentValue)
 		{
-			overflowCount = 0xFFFF - currentValue;
+			overflowCount++;;
 		}
 	}
 		
 	// check if input capture flag triggered
 	if(TIM4->SR & TIM_SR_CC1IF)
 	{
-		// clear capture interrupt flag
-		TIM4->SR &= ~TIM_SR_CC1IF;
-		
 		// check if second consecutive interrupt (current already set)
 		if(currentValue)
 		{
@@ -109,7 +106,7 @@ void TIM4_IRQHandler(void)
 			// if an overflow happened between triggers, add on pre-rollover time to current time
 			if(overflowCount)
 			{
-				timeInterval = overflowCount + currentValue;
+				timeInterval = (currentValue + (TIM4->ARR+1)*overflowCount - lastValue);
 			}
 			// otherwise, just subtract the value
 			else
@@ -127,6 +124,9 @@ void TIM4_IRQHandler(void)
 		{
 			currentValue = TIM4->CCR1;
 		}
+		
+		// clear capture interrupt flag
+		TIM4->SR &= ~TIM_SR_CC1IF;
 	}
 }
 
@@ -139,7 +139,7 @@ void Trigger_Setup()
 	// Configure PE11
 	// set mode to alternative function
 	GPIOE->MODER &= ~GPIO_MODER_MODE11; // reset
-	GPIOE->MODER |= ~GPIO_MODER_MODE11_0; // set to 01 = alternative function
+	GPIOE->MODER |= GPIO_MODER_MODE11_1; // set to 10 = alternative function
 
 	// configure the alternative function for GPIO PE11 to TIM1_CH2
 	// TIM1_CH2=AF1, pin 11 is in the upper half of the registers
@@ -227,6 +227,9 @@ int main(void)
 	char message[6];
 	while(1) 
   {
+		// wait for it to be populated
+		//while(timeInterval == 0){}
+		
 		// timer clock is 1 MHz --> 1us fidelity
 		// d = PW(us)/58 cm
 		
@@ -262,5 +265,8 @@ int main(void)
 		}
 		
 		LCD_DisplayString((uint8_t *) message);
+		
+		// reset time interval
+		timeInterval = 0;
 	}
 }

@@ -19,7 +19,7 @@ void PWM_Init()
 	// Configure PE8
 	// set mode to alternative function
 	GPIOE->MODER &= ~GPIO_MODER_MODE8; // reset
-	GPIOE->MODER |= ~GPIO_MODER_MODE8_0; // set to 01 = alternative function
+	GPIOE->MODER |= GPIO_MODER_MODE8_1; // set to 10 = alternative function
 	
 	// set output speed to very high
 	GPIOE->OSPEEDR &= ~GPIO_OSPEEDR_OSPEED8; // reset
