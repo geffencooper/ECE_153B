@@ -7,6 +7,7 @@
  */
  
 #include <stdio.h> 
+#include <string.h>
  
 #include "stm32l476xx.h"
 #include "lcd.h"
@@ -46,7 +47,7 @@ void Input_Capture_Setup()
 	TIM4->CR1 |= TIM_CR1_ARPE;
 	
 	// set the autoreload register to max value
-	TIM4->ARR = TIM_ARR_ARR-1;
+	TIM4->ARR = TIM_ARR_ARR;
 	
 	// configure capture compare mode register to map input capture 1 to timer input 1
 	TIM4->CCMR1 &= ~TIM_CCMR1_CC1S; // reset
@@ -86,7 +87,7 @@ void TIM4_IRQHandler(void)
 		// clear update interrupt flag
 		TIM4->SR &= ~TIM_SR_UIF;
 		
-		// if overflow happened after first capture, store pre-rollover time
+		// if overflow happened after first capture, increment the overflowcount, otherwise overflow doesn't affect interval
 		if(currentValue)
 		{
 			overflowCount++;;
@@ -96,6 +97,9 @@ void TIM4_IRQHandler(void)
 	// check if input capture flag triggered
 	if(TIM4->SR & TIM_SR_CC1IF)
 	{
+		// clear update interrupt flag
+		TIM4->SR &= ~TIM_SR_CC1IF;
+		
 		// check if second consecutive interrupt (current already set)
 		if(currentValue)
 		{
@@ -103,12 +107,12 @@ void TIM4_IRQHandler(void)
 			lastValue = currentValue;
 			currentValue = TIM4->CCR1;
 			
-			// if an overflow happened between triggers, add on pre-rollover time to current time
+			// if an overflow happened between triggers, add additional time to the current value
 			if(overflowCount)
 			{
 				timeInterval = (currentValue + (TIM4->ARR+1)*overflowCount - lastValue);
 			}
-			// otherwise, just subtract the value
+			// otherwise, just subtract the last value
 			else
 			{
 				timeInterval = currentValue - lastValue;
@@ -124,9 +128,6 @@ void TIM4_IRQHandler(void)
 		{
 			currentValue = TIM4->CCR1;
 		}
-		
-		// clear capture interrupt flag
-		TIM4->SR &= ~TIM_SR_CC1IF;
 	}
 }
 
@@ -167,7 +168,7 @@ void Trigger_Setup()
 	TIM1->CR1 |= TIM_CR1_ARPE;
 	
 	// set the autoreload register to max value
-	TIM1->ARR = TIM_ARR_ARR-1;
+	TIM1->ARR = TIM_ARR_ARR;
 	
 	// high pulse of 10us (PWM mode 1 and downcounting so OCREF high when count <= CCR)
 	// PW = (CCR-1)*(clock period)
@@ -177,18 +178,18 @@ void Trigger_Setup()
 	
 	// set output control mode to PWM mode 1 and enable output compare preload
 	TIM1->CCMR1 &= ~TIM_CCMR1_OC2M; // clear the output compare bits
-	TIM1->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2); // set to PWM mode 1 by setting bits 1,2 (0110)
-  TIM1->CCMR1 |= TIM_CCMR1_OC2PE; // enable output preload
+	
+	// set to PWM mode 1 by setting bits 1,2 (0110), enable output preload
+	TIM1->CCMR1 |= (TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2PE); 
 
-	// enable the output
-	TIM1->CCMR1 &= ~TIM_CCMR1_CC2S;
+	// enable the output, channel 2
 	TIM1->CCER |= TIM_CCER_CC2E;
 	
 	// set main output enable, set off-state selection for run mode
-	TIM1->BDTR |= TIM_BDTR_MOE;
-	//TIM1->BDTR |= TIM_BDTR_OSSR;
+	TIM1->BDTR |= (TIM_BDTR_MOE | TIM_BDTR_OSSR);
 	
 	// enable update generation in event generation register
+	TIM1->EGR &= ~TIM_EGR_UG;
 	TIM1->EGR |= TIM_EGR_UG;
 	
 	// enable update interrupt
@@ -202,6 +203,33 @@ void Trigger_Setup()
 
 	// enable the counter for timer 1
 	TIM1->CR1 |= TIM_CR1_CEN;
+}
+
+// converts a number to a string, zero pads the remaining spots in buffer
+void num_to_string(char* buffer, int size, int num)
+{
+	// iterate backwards from last index
+	int i = size-1;
+	
+	// convert int to string
+	while(num !=0)
+	{
+		buffer[i] = (num%10 + 48); // get digit, convert to ASCII
+		num /= 10;
+		i--;
+		
+		// number too long for buffer
+		if(i < 0)
+		{
+			break;
+		}
+	}
+	
+	// pad remaining spots in buffer with zeros
+	for(; i >= 0; i--)
+	{
+		buffer[i] = 48;
+	}
 }
 
 int main(void) 
@@ -228,41 +256,23 @@ int main(void)
 	char message[6];
 	while(1) 
   {
-		// wait for it to be populated
-		while(timeInterval == 0){}
 		
 		// timer clock is 1 MHz --> 1us fidelity
 		// d = PW(us)/58 cm
 		
 		// if the time interval is 38ms then object is out of range
-		if(timeInterval/1000 == 38)
+		if(timeInterval/1000 > 40)
 		{
-			for(int i = 0; i < 6; i++)
-			{
-				message[i] = '-';
-			}
+			//memset(message, '-', sizeof(message)) ;
+			num_to_string(message, sizeof(message), timeInterval);
 		}
 		// otherwise, find the distance, convert to a string
 		else
 		{
 			int cm = timeInterval / 58;
-			int i = 5;
-			// convert int to string
-			while(cm !=0)
-			{
-				message[i] = (cm%10 + 48);
-				cm /= 10;
-				i--;
-			}
-			for(i; i >= 0; i--)
-			{
-				message[i] = 48;
-			}
+			num_to_string(message, sizeof(message), cm);
 		}
 		
 		LCD_DisplayString((uint8_t *) message);
-		
-		// reset time interval
-		timeInterval = 0;
 	}
 }
