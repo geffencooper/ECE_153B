@@ -261,10 +261,9 @@ int main(void)
 		// d = PW(us)/58 cm
 		
 		// if the time interval is 38ms then object is out of range
-		if(timeInterval/1000 > 40)
+		if(timeInterval/1000 > 38)
 		{
-			//memset(message, '-', sizeof(message)) ;
-			num_to_string(message, sizeof(message), timeInterval);
+			memset(message, '-', sizeof(message)) ;
 		}
 		// otherwise, find the distance, convert to a string
 		else
