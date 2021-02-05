@@ -43,7 +43,7 @@ void RTC_Set_Alarm(void)
 	
 	// initialize alarm A to trigger on 30 seconds
 	                // set the tens value                set the unit value
-	RTC->ALRMAR |= ((__RTC_CONVERT_BIN2BCD(3) << 4) + (__RTC_CONVERT_BIN2BCD(0) << 0));
+	RTC->ALRMAR |= ((__RTC_CONVERT_BIN2BCD(1) << 4) + (__RTC_CONVERT_BIN2BCD(0) << 0));
 	
 	// initialize alarm B to trigger every 1 second
 	               // set the tens value                set the unit value
