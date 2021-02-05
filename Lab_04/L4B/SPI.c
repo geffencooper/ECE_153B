@@ -18,12 +18,82 @@
 extern uint8_t Rx1_Counter;
 extern uint8_t Rx2_Counter;
 
-void SPI2_GPIO_Init(void) {
-	// [TODO]
+void SPI2_GPIO_Init(void) 
+{
+	// Enable GPIO Port D Clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIODEN;
+	
+	// set mode to alternative function
+	GPIOD->MODER &= ~(GPIO_MODER_MODE1 | GPIO_MODER_MODE3 | GPIO_MODER_MODE4); // reset
+	GPIOD->MODER |= (GPIO_MODER_MODE1_1 | GPIO_MODER_MODE3_1 | GPIO_MODER_MODE4_1); // set to 10 = alternative function
+
+	// configure the alternative function for GPIO PD1, PD3, PD4 (AF5)
+	GPIOD->AFR[0] &= ~(GPIO_AFRL_AFSEL1 | GPIO_AFRL_AFSEL3 | GPIO_AFRL_AFSEL4);  // reset selection
+	GPIOD->AFR[0] |= (GPIO_AFRL_AFSEL1_2 | GPIO_AFRL_AFSEL1_0 | \
+										GPIO_AFRL_AFSEL3_2 | GPIO_AFRL_AFSEL3_0 | \
+										GPIO_AFRL_AFSEL4_2 | GPIO_AFRL_AFSEL4_0); // set bit 2,0 to select AF5 --> 0101 
+	
+	// configure modes to push-pull output
+	GPIOD->OTYPER &= ~(GPIO_OTYPER_OT1 | GPIO_OTYPER_OT3 | GPIO_OTYPER_OT4); // reset state = push-pull
+	
+	// set output speed to very high
+	GPIOD->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED1 | GPIO_OSPEEDR_OSPEED3 | GPIO_OSPEEDR_OSPEED4); // reset
+	GPIOD->OSPEEDR |= (GPIO_OSPEEDR_OSPEED1 | GPIO_OSPEEDR_OSPEED3 | GPIO_OSPEEDR_OSPEED4); // set to 11 = very high speed
+	
+	// set PUPD to no pull up no pull down
+	GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPDR1 | GPIO_PUPDR_PUPDR3 | GPIO_PUPDR_PUPDR4); // reset, no pull up, pull down = 00
 }
 
-void SPI_Init(void){
-	// [TODO] 
+void SPI_Init(void)
+{
+	// enable SPI2 clock
+	RCC->APB1ENR1 |= RCC_APB1ENR1_SPI2EN;
+	
+	// reset SPI2 then clear
+	RCC->APB1RSTR1 |= RCC_APB1RSTR1_SPI2RST;
+	RCC->APB1RSTR1 &= ~RCC_APB1RSTR1_SPI2RST;
+	
+	// disable SPI
+	SPI2->CR1 &= ~SPI_CR1_SPE;
+	
+	// configure channel for full duplex communication
+	SPI2->CR1 &= ~SPI_CR1_RXONLY;
+	
+	// configure channel for 2-line unidirectional mode, disable output in bidirectional mode
+	SPI2->CR1 &= ~(SPI_CR1_BIDIMODE | SPI_CR1_BIDIOE);
+
+	// set MSB first for TX
+	SPI2->CR1 &= ~SPI_CR1_LSBFIRST;
+	
+	// data length to 8 bits
+	SPI2->CR2 |= (SPI_CR2_DS_0 | SPI_CR2_DS_1 | SPI_CR2_DS_2);
+
+	// frame format to Motorola
+	SPI2->CR2 &= ~SPI_CR2_FRF;
+	
+	// clock polarity to 0, first clock transition is first data capture edge
+	SPI2->CR1 &= ~(SPI_CR1_CPOL | SPI_CR1_CPHA);
+
+	// baud rate prescaler to 16
+	SPI2->CR1 |= (SPI_CR1_BR_0 | SPI_CR1_BR_1); // 011 --> PSC 16
+
+	// disable CRC calculation
+	SPI2->CR1 &= ~SPI_CR1_CRCEN;
+
+	// set to master configuration, enable software peripheral management
+	SPI2->CR1 |= (SPI_CR1_MSTR | SPI_CR1_SSM);
+	
+	// set NSS pulse management
+	SPI2->CR2 |= SPI_CR2_NSSP;
+	
+	// set the internal peripheral select bit
+	SPI2->CR1 |= SPI_CR1_SSI;
+	
+	// set FIFO reception threshold to 8 bit
+	SPI2->CR2 |= SPI_CR2_FRXTH;
+	
+	// enable SPI
+	SPI2->CR1 |= SPI_CR1_SPE;
 }
  
 void SPI_Write(SPI_TypeDef * SPIx, uint8_t *txBuffer, uint8_t * rxBuffer, int size) {

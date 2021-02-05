@@ -15,8 +15,33 @@ extern void Error_Handler(void);
 //===============================================================================
 //                        I2C GPIO Initialization
 //===============================================================================
-void I2C_GPIO_Init(void) {
-	// [TODO]
+void I2C_GPIO_Init(void) 
+{
+	// configure the GPIOs for SCL(PB6) and SDA(PB7) 
+	
+	// enable the GPIO Port B clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;
+	
+	// set modes to alternative functions
+	GPIOB->MODER &= ~(GPIO_MODER_MODE6 | GPIO_MODER_MODE7); // reset
+	GPIOB->MODER |= (GPIO_MODER_MODE6_1 | GPIO_MODER_MODE7_1); // 10 = alternative function
+	
+	// configure PB6 to I2C1_SCL and PB7 to I2C_SDA alternative functions (AF7)
+	GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL6| GPIO_AFRL_AFSEL7); // reset
+	
+	// AF4 --> 0100
+	GPIOB->AFR[0]  |= (GPIO_AFRL_AFSEL6_2 | GPIO_AFRL_AFSEL7_2 );
+	
+	// configure speed to very high
+	GPIOB->OSPEEDR &= ~(GPIO_OSPEEDER_OSPEEDR6 | GPIO_OSPEEDER_OSPEEDR7); // reset
+	GPIOB->OSPEEDR |= (GPIO_OSPEEDER_OSPEEDR6 | GPIO_OSPEEDER_OSPEEDR7); // 11 = very high speed
+
+	// configure modes to open-drain output
+	GPIOB->OTYPER |= (GPIO_OTYPER_OT6 | GPIO_OTYPER_OT7); // reset state = push-pull
+	
+	// configure to use pull up resistors
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD6 | GPIO_PUPDR_PUPD7); // reset
+	GPIOB->PUPDR |= (GPIO_PUPDR_PUPD6_0 | GPIO_PUPDR_PUPD7_0); // 01 = pull up
 }
 	
 #define I2C_TIMINGR_PRESC_POS	28
@@ -28,10 +53,23 @@ void I2C_GPIO_Init(void) {
 //===============================================================================
 //                          I2C Initialization
 //===============================================================================
-void I2C_Initialization(void){
+void I2C_Initialization(void)
+{
 	uint32_t OwnAddr = 0x52;
 	
-	// [TODO]
+	// enable the clock for I2C1
+	RCC->APB1ENR1 |= RCC_APB1ENR1_I2C1EN;
+	
+	// set the system clock as the I2C clock source
+	RCC->CCIPR &= ~RCC_CCIPR_I2C1SEL; // reset
+	RCC->CCIPR |= RCC_CCIPR_I2C1SEL_0; // system clock --> (01)
+
+	// reset I2C and then clear
+	RCC->APB1RSTR1 |= RCC_APB1RSTR1_I2C1RST;
+	RCC->APB1RSTR1 &= ~RCC_APB1RSTR1_I2C1RST;
+	
+	// disable I2C1
+	//I2C1->CR1 &= ~I2C_CR1_
 }
 
 //===============================================================================

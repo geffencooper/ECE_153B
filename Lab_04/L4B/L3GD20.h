@@ -142,6 +142,12 @@
 #define L3GD20_CS_LOW   GPIOD->ODR &= ~(1U << 7);    
 #define L3GD20_CS_HIGH  GPIOD->ODR |=  (1U << 7); 
 
+// status register data available bits
+#define L3GD0_SR_ZYXDA 0x08 // data is available for all axes
+#define L3GD0_SR_ZDA   0x04 // data is available for Z axis
+#define L3GD0_SR_YDA   0x02 // data is available for Y axis
+#define L3GD0_SR_XDA   0x01 // data is available for X axis
+
 void GYRO_Init(void);
 void GYRO_IO_CS_Init(void);
 void GYRO_IO_Write(uint8_t *pBuffer, uint8_t WriteAddr, uint8_t NumByteToWrite);

@@ -16,8 +16,23 @@ void GYRO_Init(void) {
 }
 
 // Gyroscope IO functions
-void GYRO_IO_CS_Init(void) {
-	// [TODO]
+void GYRO_IO_CS_Init(void)
+{
+	// Enable GPIO Port D Clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIODEN;
+	
+	// set mode to output
+	GPIOD->MODER &= ~(GPIO_MODER_MODE7); // reset = output
+
+	// configure modes to push-pull output
+	GPIOD->OTYPER &= ~(GPIO_OTYPER_OT7); // reset state = push-pull
+	
+	// set output speed to very high
+	GPIOD->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED7); // reset
+	GPIOD->OSPEEDR |= (GPIO_OSPEEDR_OSPEED7); // set to 11 = very high speed
+	
+	// set PUPD to no pull up no pull down
+	GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPDR7); // reset, no pull up, pull down = 00
 	
 	// Deselect the Gyroscope
 	L3GD20_CS_HIGH;
@@ -72,6 +87,27 @@ void GYRO_IO_Read(uint8_t *pBuffer, uint8_t ReadAddr, uint8_t NumByteToRead){
 }	
 
 
-void L3GD20_Init(void) {  
-	// [TODO]
+void L3GD20_Init(void) 
+{  
+	uint8_t test = 0;
+	GYRO_IO_Read(&test, L3GD20_WHO_AM_I_ADDR, 1);
+	// write to control register 1 of the gyroscope
+	// -enable x, y, z axis
+	// -set to normal mode
+	// -set DR and BW to 95Hz and 25
+	
+	uint8_t ctrl_reg1_val = 0;
+	uint8_t ctrl_reg4_val = 0;
+	
+	ctrl_reg1_val |= (L3GD20_Z_ENABLE | L3GD20_Y_ENABLE | L3GD20_X_ENABLE | \
+										L3GD20_MODE_ACTIVE | \
+										L3GD20_BANDWIDTH_2 | \
+										L3GD20_OUTPUT_DATARATE_1);
+	test = 0;
+	GYRO_IO_Write(&ctrl_reg1_val, L3GD20_CTRL_REG1_ADDR, 1);
+	GYRO_IO_Read(&test, L3GD20_CTRL_REG1_ADDR, 1);
+	
+	// set 2000 dps in control register 4
+	ctrl_reg4_val |= L3GD20_FULLSCALE_2000;
+	GYRO_IO_Write(&ctrl_reg4_val, L3GD20_CTRL_REG4_ADDR, 1);
 }
