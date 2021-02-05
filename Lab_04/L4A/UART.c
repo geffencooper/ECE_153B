@@ -1,7 +1,15 @@
 #include "UART.h"
 
-void UART1_Init(void) {
-	// [TODO]
+void UART1_Init(void) 
+{
+	// Set up the clock for USART1
+	
+	// enable USART1 clock in peripheral clock register (APB2, P.246)
+	RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+
+	// set system clock as USART1 clock source (P.257) 
+	RCC->CCIPR &= ~RCC_CCIPR_USART1SEL; // reset
+	RCC->CCIPR |= RCC_CCIPR_USART1SEL_0; // system clock --> (01)
 }
 
 void UART2_Init(void) 
@@ -16,8 +24,34 @@ void UART2_Init(void)
 	RCC->CCIPR |= RCC_CCIPR_USART2SEL_0; // system clock --> (01)
 }
 
-void UART1_GPIO_Init(void) {
-	// [TODO]
+void UART1_GPIO_Init(void) 
+{
+	// configure the GPIOs for TX(PB6) and RX(PB7) 
+	
+	// enable the GPIO Port B clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;
+	
+	// set modes to alternative functions
+	GPIOB->MODER &= ~(GPIO_MODER_MODE6 | GPIO_MODER_MODE7); // reset
+	GPIOB->MODER |= (GPIO_MODER_MODE6_1 | GPIO_MODER_MODE7_1); // 10 = alternative function
+	
+	// configure PB6 to UART1_TX and PB7 to USART1_RX alternative functions (AF7)
+	GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL6| GPIO_AFRL_AFSEL7); // reset
+	
+	// AF7 --> 0111, set first three bits for both pins
+	GPIOB->AFR[0]  |= (GPIO_AFRL_AFSEL6_0 | GPIO_AFRL_AFSEL6_1 | GPIO_AFRL_AFSEL6_2 | \
+										 GPIO_AFRL_AFSEL7_0 | GPIO_AFRL_AFSEL7_1 | GPIO_AFRL_AFSEL7_2);
+	
+	// configure speed to very high
+	GPIOB->OSPEEDR &= ~(GPIO_OSPEEDER_OSPEEDR6 | GPIO_OSPEEDER_OSPEEDR7); // reset
+	GPIOB->OSPEEDR |= (GPIO_OSPEEDER_OSPEEDR6 | GPIO_OSPEEDER_OSPEEDR7); // 11 = very high speed
+
+	// configure modes to push-pull output
+	GPIOB->OTYPER &= ~(GPIO_OTYPER_OT6 | GPIO_OTYPER_OT7); // reset state = push-pull
+	
+	// configure to use pull up resistors
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD6 | GPIO_PUPDR_PUPD7); // reset
+	GPIOB->PUPDR |= (GPIO_PUPDR_PUPD6_0 | GPIO_PUPDR_PUPD7_0); // 01 = pull up
 }
 
 void UART2_GPIO_Init(void) 

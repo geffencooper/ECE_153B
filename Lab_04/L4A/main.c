@@ -30,12 +30,13 @@ int main(void)
 	LED_Init();
 	
 	// Initialize UART -- change the argument depending on the part you are working on
-	Init_USARTx(2);
+	Init_USARTx(1);
 	
 	char rxByte;
 	
 	// prompt the user to enter a command
-	printf("\nEnter a command:\tRed LED state: %i\n1. Turn on the red LED  (Y/y)\r\n2. Turn off the red LED  (N/n)\r\n", Red_LED_Read());
+	printf("\n---------------------------\n");
+	printf("Enter a command:\tRed LED state: %i\n1. Turn on the red LED  (Y/y)\r\n2. Turn off the red LED  (N/n)\r\n", Red_LED_Read());
 	while(1) 
 	{
 		scanf("%c", &rxByte);
@@ -51,8 +52,9 @@ int main(void)
 		}
 		else
 		{
-			printf("The command entered is invalid\n");
+			printf("The command entered is invalid. Try again\n");
 		}
-		printf("\nEnter a command:\tRed LED state: %i\n1. Turn on the red LED  (Y/y)\r\n2. Turn off the red LED  (N/n)\r\n", Red_LED_Read());
+		printf("\n---------------------------\n");
+		printf("Enter a command:\tRed LED state: %i\n1. Turn on the red LED  (Y/y)\r\n2. Turn off the red LED  (N/n)\r\n", Red_LED_Read());
 	}
 }
