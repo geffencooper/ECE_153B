@@ -19,7 +19,7 @@ void GYRO_Init(void) {
 void GYRO_IO_CS_Init(void)
 {
 	// Enable GPIO Port D Clock
-	RCC->AHB2ENR |= RCC_AHB2ENR_GPIODEN;
+	//RCC->AHB2ENR |= RCC_AHB2ENR_GPIODEN;
 	
 	// set mode to output
 	GPIOD->MODER &= ~(GPIO_MODER_MODE7); // reset = output
