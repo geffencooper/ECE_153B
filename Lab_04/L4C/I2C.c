@@ -69,7 +69,58 @@ void I2C_Initialization(void)
 	RCC->APB1RSTR1 &= ~RCC_APB1RSTR1_I2C1RST;
 	
 	// disable I2C1
-	//I2C1->CR1 &= ~I2C_CR1_
+	I2C1->CR1 &= ~I2C_CR1_PE;
+	
+	// enable analog noise filtering, disable digital noise filtering, enable clock stretching
+	I2C1->CR1 &= ~(I2C_CR1_ANFOFF | I2C_CR1_DNF | I2C_CR1_NOSTRETCH);
+	
+	// enable error interrupts
+	I2C1->CR1 |= I2C_CR1_ERRIE;
+	
+	// 7 bit addressing mode
+	I2C1->CR2 &= ~I2C_CR2_ADD10;
+	
+	// enable autoend mode and nack generation
+	I2C1->CR2 |= (I2C_CR2_AUTOEND | I2C_CR2_NACK);
+	
+	/*
+  	 Timing:
+				data_setup = 1000ns = 1us
+				data_hold = 1250ns = 1.25us
+				t_high = 4us
+				t_low = 4.7us
+				
+				set t_psc to units of tenths of us --> f_psc = 10MHz
+				f_psc = (80MHz)/(7+1) = 10 MHz --> t_psc = 0.1us, PSC = 7
+
+				t_SCLDEL = (10 + 1)*(0.1us) = 1.1us > 1us    --> SCLDEL = 10
+				t_SDADEL = (12 + 1)*(0.1us) = 1.3us > 1.25us --> SDADEL = 12
+				t_SCLH = (40 + 1)*(0.1us) = 4.1us > 4us      --> SCLH = 40
+				t_SCLL = (47 + 1)*(0.1us) = 4.8us > 4.7us    --> SCLL = 47
+	*/
+	
+	// set the I2C PSC, SCLDEL, SDADEL, SCLH, SCLL
+	I2C1->TIMINGR |= ((7 << I2C_TIMINGR_PRESC_POS) | \
+										(10 << I2C_TIMINGR_SCLDEL_POS) |
+										(12 << I2C_TIMINGR_SDADEL_POS) |
+										(40 << I2C_TIMINGR_SCLH_POS) |
+										(47 << I2C_TIMINGR_SCLL_POS));
+	
+	// disable own1 address, disable own2 address
+	I2C1->OAR1 &= ~I2C_OAR1_OA1EN;
+	I2C1->OAR2 &= ~I2C_OAR2_OA2EN;
+	
+	// set address to 7 bit mode
+	I2C1->OAR1 &= ~I2C_OAR1_OA1MODE;
+	
+	// set adress to 0x52, bits start from 0
+	I2C1->OAR1 |= OwnAddr;
+
+	// enable own1 address
+	I2C1->OAR1 |= I2C_OAR1_OA1EN;
+	
+	// enable I2C1
+	I2C1->CR1 |= I2C_CR1_PE;
 }
 
 //===============================================================================
