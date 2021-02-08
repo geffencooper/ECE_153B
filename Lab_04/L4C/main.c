@@ -11,7 +11,7 @@ void num_to_string(char* buffer, int size, int num)
 	uint8_t is_negative = 0;
 	if(num < 0)
 	{
-		num*=-1;
+		num*=-1; // make it positive so can mod correctly
 		is_negative = 1;
 	}
 	
@@ -63,17 +63,18 @@ int main(void)
 	uint8_t Data_Send = 0;
 	int8_t temp = 0;
 	
+	// TC74A0 5.0VAT --> address = 1001000
+	// Note the "<< 1" must be present because bit 0 is treated as a don't care in 7-bit addressing mode
+	SlaveAddress = 0x48 << 1;
+	
 	// set mode to normal by writing to configuration register
-	/*Data_Send = 0b00000001; // config register address
+	Data_Send = 1; // config register address 0x01
 	I2C_SendData(I2C1, SlaveAddress, &Data_Send, 1);
-	Data_Send = 0b00000000; // normal mode
-	I2C_SendData(I2C1, SlaveAddress, &Data_Send, 1);*/
+	Data_Send = 0; // normal mode
+	I2C_SendData(I2C1, SlaveAddress, &Data_Send, 1);
+	
 	while(1) 
 	{	
-		// TC74A0 5.0VAT --> address = 1001000
-		// Note the "<< 1" must be present because bit 0 is treated as a don't care in 7-bit addressing mode
-		SlaveAddress = 0x48 << 1;
-		
 		// First, send a command to the sensor for reading the temperature
 		Data_Send = 0; // temp register address
 		I2C_SendData(I2C1, SlaveAddress, &Data_Send, 1);
@@ -81,15 +82,11 @@ int main(void)
 		// Next, get the measurement
 		I2C_ReceiveData(I2C1, SlaveAddress, &Data_Receive, 1);
 		
-		// convert from twos complement if negative
-		if(Data_Receive & 0x80)
-		{
-			temp = -1*(~Data_Receive + 1);
-		}
-		else
-		{
-			temp = Data_Receive;
-		}
+		// test negative temp --> -5 degrees
+		// Data_Receive = 0xFB;
+		
+		// convert data to signed
+		temp = Data_Receive;
 		
 		// convert the temp to a string
 		num_to_string(message, sizeof(message), temp);

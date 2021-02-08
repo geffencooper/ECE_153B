@@ -30,7 +30,7 @@ int main(void)
 	LED_Init();
 	
 	// Initialize UART -- change the argument depending on the part you are working on
-	Init_USARTx(2);
+	Init_USARTx(1);
 	
 	char rxByte;
 	
