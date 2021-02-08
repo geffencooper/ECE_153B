@@ -60,9 +60,9 @@ int main(void){
 			
 			// the raw data for each axis is in 16 bit 2's complement
 			// each digit of raw data is 0.070 degrees/sec, multiply the raw data by 0.07 to get dps
-			gyro_data.x = ((float)(((Gyro_Raw_Data_t*)read_buffer)->x_raw))*((float)0.07);
-			gyro_data.y = ((float)(((Gyro_Raw_Data_t*)read_buffer)->y_raw))*((float)0.07);
-			gyro_data.z = ((float)(((Gyro_Raw_Data_t*)read_buffer)->z_raw))*((float)0.07);
+			gyro_data.x = (((Gyro_Raw_Data_t*)read_buffer)->x_raw)*0.07;
+			gyro_data.y = (((Gyro_Raw_Data_t*)read_buffer)->y_raw)*0.07;
+			gyro_data.z = (((Gyro_Raw_Data_t*)read_buffer)->z_raw)*0.07;
 		}
 		
 		printf("X: %f\tY: %f\tZ: %f\n", gyro_data.x, gyro_data.y, gyro_data.z);

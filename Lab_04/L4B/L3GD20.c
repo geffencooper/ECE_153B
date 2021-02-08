@@ -89,8 +89,10 @@ void GYRO_IO_Read(uint8_t *pBuffer, uint8_t ReadAddr, uint8_t NumByteToRead){
 
 void L3GD20_Init(void) 
 {  
+	// try to read the gyro ID as a test
 	uint8_t test = 0;
 	GYRO_IO_Read(&test, L3GD20_WHO_AM_I_ADDR, 1);
+	
 	// write to control register 1 of the gyroscope
 	// -enable x, y, z axis
 	// -set to normal mode
@@ -103,8 +105,12 @@ void L3GD20_Init(void)
 										L3GD20_MODE_ACTIVE | \
 										L3GD20_BANDWIDTH_2 | \
 										L3GD20_OUTPUT_DATARATE_1);
-	test = 0;
+
+	// initialize the gyro parameters
 	GYRO_IO_Write(&ctrl_reg1_val, L3GD20_CTRL_REG1_ADDR, 1);
+	
+	// read the register just written to as a test
+	test = 0;
 	GYRO_IO_Read(&test, L3GD20_CTRL_REG1_ADDR, 1);
 	
 	// set 2000 dps in control register 4
