@@ -66,6 +66,7 @@ void SPI_Init(void)
 	SPI2->CR1 &= ~SPI_CR1_LSBFIRST;
 	
 	// data length to 8 bits
+	SPI2->CR2 &= ~(SPI_CR2_DS_0 | SPI_CR2_DS_1 | SPI_CR2_DS_2);
 	SPI2->CR2 |= (SPI_CR2_DS_0 | SPI_CR2_DS_1 | SPI_CR2_DS_2);
 
 	// frame format to Motorola
@@ -75,12 +76,14 @@ void SPI_Init(void)
 	SPI2->CR1 &= ~(SPI_CR1_CPOL | SPI_CR1_CPHA);
 
 	// baud rate prescaler to 16
+	SPI2->CR1 &= ~(SPI_CR1_BR_0 | SPI_CR1_BR_1);
 	SPI2->CR1 |= (SPI_CR1_BR_0 | SPI_CR1_BR_1); // 011 --> PSC 16
 
 	// disable CRC calculation
 	SPI2->CR1 &= ~SPI_CR1_CRCEN;
 
 	// set to master configuration, enable software peripheral management
+	SPI2->CR1 &= ~(SPI_CR1_MSTR | SPI_CR1_SSM);
 	SPI2->CR1 |= (SPI_CR1_MSTR | SPI_CR1_SSM);
 	
 	// set NSS pulse management

@@ -22,7 +22,8 @@ void GYRO_IO_CS_Init(void)
 	//RCC->AHB2ENR |= RCC_AHB2ENR_GPIODEN;
 	
 	// set mode to output
-	GPIOD->MODER &= ~(GPIO_MODER_MODE7); // reset = output
+	GPIOD->MODER &= ~(GPIO_MODER_MODE7);
+	GPIOD->MODER |= (GPIO_MODER_MODE7_0); // reset = output
 
 	// configure modes to push-pull output
 	GPIOD->OTYPER &= ~(GPIO_OTYPER_OT7); // reset state = push-pull
@@ -109,11 +110,14 @@ void L3GD20_Init(void)
 	// initialize the gyro parameters
 	GYRO_IO_Write(&ctrl_reg1_val, L3GD20_CTRL_REG1_ADDR, 1);
 	
-	// read the register just written to as a test
-	test = 0;
-	GYRO_IO_Read(&test, L3GD20_CTRL_REG1_ADDR, 1);
+	// read the register written to as a test
+	//test = 0;
+	//GYRO_IO_Read(&test, L3GD20_CTRL_REG1_ADDR, 1);
 	
 	// set 2000 dps in control register 4
 	ctrl_reg4_val |= L3GD20_FULLSCALE_2000;
 	GYRO_IO_Write(&ctrl_reg4_val, L3GD20_CTRL_REG4_ADDR, 1);
+	
+	//test = 0;
+	//GYRO_IO_Read(&test, L3GD20_CTRL_REG4_ADDR, 1);
 }
