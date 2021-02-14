@@ -67,11 +67,13 @@ void ADC_Init(void)
 	ADC_Wakeup();
 	
   // ADC configuration
-	ADC1->CR |= ADC_CR_ADDIS; // disable ADC
+	ADC1->CR |= ADC_CR_ADEN; // enable ADC
+	ADC1->CR |= ADC_CR_ADDIS; // disable ADC, can only be disabled when aden=1
+	
 	ADC1->CFGR &= ~(ADC_CFGR_RES | ADC_CFGR_ALIGN); // 12 bit resolution (00), right alignment (0)
 	ADC1->SQR1 &= ~ADC_SQR1_L; // set sequence length to 1
 	ADC1->SQR1 &= ~ADC_SQR1_SQ1; // reset
-	ADC1->SQR1 |= 0x06; // set first conversion channel to 6
+	ADC1->SQR1 |= (0x06 << 6); // set first conversion channel to 6
 	ADC1->DIFSEL &= ~ADC_DIFSEL_DIFSEL_6; // set channel 6 to single ended mode
 	ADC1->SMPR1 &= ~ADC_SMPR1_SMP6; // reset
 	ADC1->SMPR1 |= (ADC_SMPR1_SMP6_0 | ADC_SMPR1_SMP6_1); // set channel 6 sample time to 24.5
