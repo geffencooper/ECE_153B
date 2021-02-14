@@ -3,11 +3,11 @@
 
 #include "stm32l476xx.h"
 
-#define ADC_SAMPLE_SIZE 100
+#define  ADC_SAMPLE_SIZE 100
 
 void ADC_Init(void);
 
-void ADC_Wakeup(void);
+void ADC_Wakeup (void);
 void ADC_Init(void);
 
 void ADC_Pin_Init(void);

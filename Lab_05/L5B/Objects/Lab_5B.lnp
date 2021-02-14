@@ -1,0 +1,14 @@
+--cpu=Cortex-M4.fp.sp --branchpatch=sdcomp-29491-629360
+".\objects\adc.o"
+".\objects\dac.o"
+".\objects\exti.o"
+".\objects\lcd.o"
+".\objects\led.o"
+".\objects\main.o"
+".\objects\pwm.o"
+".\objects\startup_stm32l476xx.o"
+".\objects\sysclock.o"
+--strict --scatter ".\Objects\Lab_5B.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\Lab_5B.map" -o .\Objects\Lab_5B.axf
