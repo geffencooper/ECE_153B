@@ -7,25 +7,21 @@
 
 #include <stdio.h>
 
-// converts a number to a string, zero pads the remaining spots in buffer
-void num_to_string(char* buffer, int size, int num)
+// converts a float to a string with 3 fraction and 2 integer digits "01.234V"
+void voltage_to_string(char* buffer, int size, float num)
 {
-	// keep track of the sign
-	uint8_t is_negative = 0;
-	if(num < 0)
-	{
-		num*=-1; // make it positive so can mod correctly
-		is_negative = 1;
-	}
+	// get the integer digits and fraction digits
+	int integer_dig = (int)num;
+	int fraction_dig = (num - (float)integer_dig)*1000;
 	
-	// iterate backwards from last index
-	int i = size-1;
+	// starting index of integer part
+	int i = 1;
 	
-	// convert int to string
-	while(num !=0)
+	// convert integer part to string
+	while(integer_dig != 0)
 	{
-		buffer[i] = (num%10 + 48); // get digit, convert to ASCII
-		num /= 10;
+		buffer[i] = (integer_dig%10 + 48); // get digit, convert to ASCII
+		integer_dig /= 10;
 		i--;
 		
 		// number too long for buffer
@@ -35,17 +31,37 @@ void num_to_string(char* buffer, int size, int num)
 		}
 	}
 	
-	// pad remaining spots in buffer with zeros
+	// pad remaining integer spots in buffer with zeros
 	for(; i >= 0; i--)
 	{
 		buffer[i] = 48;
 	}
 	
-	// add a negative sign if necessary
-	if(is_negative)
+	// convert float to digits
+	buffer[2] = '.'; // set the decimal point
+	
+	// starting index of fraction part
+	i = size-2;
+	
+	// convert fraction part to string
+	while(fraction_dig != 0)
 	{
-		buffer[0] = '-';
+		buffer[i] = (fraction_dig%10 + 48); // get digit, convert to ASCII
+		fraction_dig /= 10;
+		i--;
+		
+		// number too long for buffer
+		if(i < 0)
+		{
+			break;
+		}
 	}
+	// pad remaining integer spots in buffer with zeros
+	for(; i > 2; i--)
+	{
+		buffer[i] = 48;
+	}
+	buffer[size-1] = 'V';
 }
 
 int main(void) 
@@ -59,15 +75,23 @@ int main(void)
     LCD_Clear();
 
 		int adc_data = 0;
-		char msg[6];
+		float voltage = 0;
+		char measurement[7];
+	
     while (1) 
 		{
-        // Trigger ADC and get result
+        // Trigger ADC, wait till complete
 				ADC1->CR |= ADC_CR_ADSTART;
 				while((ADC1->ISR & ADC_ISR_EOC) == 0); // wait for conversion to be complete
+				
+			  // get ADC result, convert to voltage
 				adc_data = ADC1->DR;
-				num_to_string(msg, sizeof(msg), adc_data);
-				LCD_DisplayString((uint8_t*)msg);
+			
+				voltage = 3.3*(((float)adc_data)/4096);
+				float test = voltage;
+			
+				voltage_to_string(measurement, sizeof(measurement), voltage);
+				LCD_DisplayString((uint8_t*)measurement);
         // [TODO] LED behavior based on ADC result
     }
 }
