@@ -28,15 +28,29 @@ Project File Date:  02/12/2021
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'Target 1'
 compiling main.c...
-main.c(90): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-  				voltage = 3.3*(((float)adc_data)/4096);
-main.c(91): warning:  #177-D: variable "test"  was declared but never referenced
+LED.h(7): warning:  #1295-D: Deprecated declaration LED_init - give arg types
+  void LED_init();
+LED.h(10): warning:  #1295-D: Deprecated declaration red_LED_init - give arg types
+  void red_LED_init();
+LED.h(13): warning:  #1295-D: Deprecated declaration green_LED_init - give arg types
+  void green_LED_init();
+LED.h(16): warning:  #1295-D: Deprecated declaration red_LED_on - give arg types
+  void red_LED_on();
+LED.h(17): warning:  #1295-D: Deprecated declaration red_LED_off - give arg types
+  void red_LED_off();
+PWM.h(6): warning:  #1295-D: Deprecated declaration PWM_Init - give arg types
+  void PWM_Init();
+main.c(97): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  				voltage = 3.0*(((float)adc_data)/4096);
+main.c(105): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+  				if(voltage >= 2.0)
+main.c(98): warning:  #177-D: variable "test"  was declared but never referenced
   				float test = voltage;
-main.c: 2 warnings, 0 errors
+main.c: 9 warnings, 0 errors
 linking...
-Program Size: Code=5346 RO-data=482 RW-data=0 ZI-data=1632  
+Program Size: Code=6122 RO-data=482 RW-data=0 ZI-data=1632  
 FromELF: creating hex file...
-".\Objects\Lab_5A.axf" - 0 Error(s), 2 Warning(s).
+".\Objects\Lab_5A.axf" - 0 Error(s), 9 Warning(s).
 
 <h2>Software Packages used:</h2>
 

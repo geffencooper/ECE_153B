@@ -64,12 +64,18 @@ void voltage_to_string(char* buffer, int size, float num)
 	buffer[size-1] = 'V';
 }
 
+#define ON 1
+#define OFF 0
+
 int main(void) 
 {
     // Initialization
     System_Clock_Init(); // Switch System Clock = 16 MHz
     ADC_Init();
-    // [TODO] Initialize LEDs and PWM
+	
+    // Initialize LEDs and PWM
+		LED_init();
+		PWM_Init();
 
     LCD_Initialization();
     LCD_Clear();
@@ -77,6 +83,7 @@ int main(void)
 		int adc_data = 0;
 		float voltage = 0;
 		char measurement[7];
+		uint8_t red_led_state = OFF;
 	
     while (1) 
 		{
@@ -87,11 +94,23 @@ int main(void)
 			  // get ADC result, convert to voltage
 				adc_data = ADC1->DR;
 			
-				voltage = 3.3*(((float)adc_data)/4096);
+				voltage = 3.0*(((float)adc_data)/4096);
 				float test = voltage;
 			
 				voltage_to_string(measurement, sizeof(measurement), voltage);
 				LCD_DisplayString((uint8_t*)measurement);
-        // [TODO] LED behavior based on ADC result
+			
+        // LED behavior based on ADC result
+				set_duty_cycle((adc_data*100)/4096);
+				if(voltage >= 2.0)
+				{
+					red_LED_on();
+					red_led_state = ON;
+				}
+				else if(red_led_state == ON) // only turn off if on
+				{
+					red_LED_off();
+					red_led_state = OFF;
+				}
     }
 }
